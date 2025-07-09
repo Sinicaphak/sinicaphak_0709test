@@ -1,5 +1,4 @@
 build
-output
-temp_tool
+output/
+temp_tool/
 .vscode
-.gitignore
