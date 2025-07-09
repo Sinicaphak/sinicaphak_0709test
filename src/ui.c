@@ -85,7 +85,7 @@ int push_g_friends(friend_info* new_friend) {
         log_error("好友列表已满，无法添加新好友");
         return -1; 
     }
-    pthread_mutex_lock(&g_friends_lock);
+    // pthread_mutex_lock(&g_friends_lock);
 
     for (int i = 0; i < g_friends_len; i++) {
         if (strcmp(g_friends[i].name, new_friend->name) == 0) {
@@ -95,7 +95,7 @@ int push_g_friends(friend_info* new_friend) {
     }
     memcpy(&g_friends[g_friends_len], new_friend, sizeof(friend_info));
     g_friends_len++;
-    pthread_mutex_unlock(&g_friends_lock);
+    // pthread_mutex_unlock(&g_friends_lock);
     return 0;
 }
 
