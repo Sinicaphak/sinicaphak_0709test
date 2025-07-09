@@ -80,6 +80,8 @@ void end_program(int signum) {
     // todo 不加这一行程序会退出吗
     // todo crtl c要按2次才退出
     signal(SIGINT, SIG_DFL);
+    // 清屏
+    system("clear");
 }
 
 void main() {    
