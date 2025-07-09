@@ -33,6 +33,7 @@ int create_udp_send_socket(int* server_socket, bool is_broadcast) {
     ) {
         perror("server udp bind failed");
         log_fatal("bind failed");
+        return -1;
     }
 
     return 0;

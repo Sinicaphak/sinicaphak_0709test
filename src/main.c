@@ -95,10 +95,15 @@ void main() {
     g_config = malloc(sizeof(Config*));
     read_out_config(g_config);
 
-    create_udp_send_socket(&br_tx_s, true);
-    create_udp_recv_socket(&bt_rx_s, true);
-    create_udp_send_socket(&da_tx_s, false);
-    create_udp_recv_socket(&da_rx_s, false);
+    if (
+        create_udp_send_socket(&br_tx_s, true)  < 0 ||
+        create_udp_recv_socket(&bt_rx_s, true)  < 0 ||
+        create_udp_send_socket(&da_tx_s, false) < 0 ||
+        create_udp_recv_socket(&da_rx_s, false) < 0
+    ) {
+        log_fatal("Failed to create UDP sockets");
+        g_bRunning = false;
+    }
 
     // 初始化g_chats和g_friends的锁
     pthread_mutex_init(&g_friends_lock, NULL);
