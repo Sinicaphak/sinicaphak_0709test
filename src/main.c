@@ -1,48 +1,5 @@
 #include "main.h"
 
-#define ORDER_MODEL 'e'
-#define INPUT_MODEL 'i'
-
-const enum LOG_LEVEL LOG_LEVEL = LOG_WARN;
-bool g_bRunning = true;
-
-// 创建广播发送br_tx_s;
-// 创建广播接收bt_rx_s,
-// 创建数据发送da_tx_s;
-// 创建数据接收da_rx_s,
-int br_tx_s = 0;
-int bt_rx_s = 0;
-int da_tx_s = 0;
-int da_rx_s = 0;
-
-pthread_t broadcast_thread_pid;
-pthread_t receive_thread_pid;
-
-int CreateThread(pthread_t* thread, void *(*thread_func)(void *)) {
-    if (pthread_create(thread, NULL, thread_func, NULL) != 0) {
-        perror("Failed to create thread");
-        log_fatal("Failed to create thread");
-        return -1;
-    }
-    
-    return 0;
-}
-
-// 设置终端为非规范模式
-// 无需回车直接捕捉输入字符
-void set_input_mode(int enable) {
-    static struct termios oldt;
-    static struct termios newt;
-    if (enable) {
-        tcgetattr(STDIN_FILENO, &oldt); // 保存原设置
-        newt = oldt;
-        newt.c_lflag &= ~(ICANON | ECHO); // 关闭规范模式和回显
-        tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    } else {
-        tcsetattr(STDIN_FILENO, TCSANOW, &oldt); // 恢复原设置
-    }
-}
-
 //非阻塞检测键盘输入
 static int get_char() {
     fd_set rfds;
@@ -59,78 +16,8 @@ static int get_char() {
     return ch;
 }
 
-// 收尾
-void end_program(int signum) {
-    g_bRunning = false;
-    log_info("Ending program...");
-    // 恢复光标
-    printf("\033[?25h");
-    // 设置终端为规范模式
-    set_input_mode(0);
-    // 释放资源
-    if (g_config) {
-        free(g_config);
-        g_config = NULL;
-    }
-    // 关闭套接字
-    close(br_tx_s);
-    close(bt_rx_s);
-    close(da_tx_s);
-    close(da_rx_s);
-    // todo 不加这一行程序会退出吗
-    // todo crtl c要按2次才退出
-    signal(SIGINT, SIG_DFL);
-    // 清屏
-    system("clear");
-}
-
 void main() {    
-    // 设置日志锁
-    log_set_lock(log_lock, NULL);
-    log_info("Starting server...");
-    log_set_level(LOG_LEVEL);
-
-    // 隐藏光标, 不然会乱闪
-    printf("\033[?25l");
-    
-    // 加载本地配置
-    g_config = malloc(sizeof(Config*));
-    read_out_config(g_config);
-
-    if (
-        create_udp_send_socket(&br_tx_s, true)  < 0 ||
-        create_udp_recv_socket(&bt_rx_s, true)  < 0 ||
-        create_udp_send_socket(&da_tx_s, false) < 0 ||
-        create_udp_recv_socket(&da_rx_s, false) < 0
-    ) {
-        log_fatal("Failed to create UDP sockets");
-        g_bRunning = false;
-    }
-
-    // 初始化g_chats和g_friends的锁
-    pthread_mutex_init(&g_friends_lock, NULL);
-    pthread_mutex_init(&g_chats_lock, NULL);
-
-    // 创建线程
-    CreateThread(&broadcast_thread_pid, broadcast_thread);
-    CreateThread(&receive_thread_pid, receive_thread);
-
-    // 标记S3状态
-    static uchar friend_now = NULL_FRIEND; // 当前好友代号
-    static char input_model = INPUT_MODEL; // 输入模式
-    static bool is_press_S = false; // 是否按下S键, S发送聊天记录(按CR键后才生效)
-    static bool is_press_cr = false; // 是否按下CR键, CR发送聊天记录(按CR键后才生效)
-
-    // 注册 crtl c 时收尾函数
-    signal(SIGINT, end_program);
-    // 设置终端为非规范模式
-    set_input_mode(1);
-
-    // 清屏
-    system("clear");
-    refresh_S1();
-    refresh_S2();
-    refresh_S3(friend_now, input_model, is_press_S);
+    init_all();
 
     while(g_bRunning) {
         // 接收输入;
@@ -187,7 +74,7 @@ void main() {
                         break;
                     }
                     case 'q' : {
-                        g_bRunning = false; // 退出程序
+                        g_bRunning = g_bRunning_EXIT; // 退出程序
                         log_info("Quit command received, exiting...");
                         break;
                     }
@@ -273,7 +160,7 @@ void main() {
         refresh_S2();
     }
 
-    g_bRunning = false;
+    g_bRunning = g_bRunning_EXIT;
     // 等待子线程结束
     pthread_join(broadcast_thread_pid, NULL);
     pthread_join(receive_thread_pid, NULL);

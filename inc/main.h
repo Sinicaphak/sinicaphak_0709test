@@ -41,24 +41,12 @@
 #ifndef uchar
     #define uchar unsigned char
 #endif
+#include "init.h"
+#include "main_thread.h"
 #include "udp_socket.h"
 #include "broadcast_thread.h"
 #include "receive_thread.h"
 #include "read_config.h"
 #include "ui.h"
-
-#define BROADCAST_PORT 10000
-#define CHAT_PORT 10001
-
-// 创建广播发送br_tx_s;
-// 创建广播接收bt_rx_s,
-// 创建数据发送da_tx_s;
-// 创建数据接收da_rx_s,
-extern int br_tx_s;
-extern int bt_rx_s;
-extern int da_tx_s;
-extern int da_rx_s;
-
-extern bool g_bRunning;
 
 #endif

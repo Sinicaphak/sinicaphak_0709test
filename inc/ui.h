@@ -3,6 +3,9 @@
 
 #include "main.h"
 
+#define ORDER_MODEL 'e'
+#define INPUT_MODEL 'i'
+
 #define NULL_FRIEND 255
 
 #define S1_ROW 4
