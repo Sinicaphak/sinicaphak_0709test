@@ -1,5 +1,16 @@
 #include "main.h"
 
+// todo 仅在测试时使用
+void test_input_S1(void) {
+    friend_info test;
+    char test_name[20] = {0};
+    for (int i = 0; i < N - 3; i++) {
+        snprintf(test.name, sizeof(test.name), "test_friend_%d", i);
+        strcpy(test.ip, "111.111.111.111");
+        push_g_friends(&test);
+    }
+}
+
 // 创建线程
 int CreateThread(pthread_t* thread, void *(*thread_func)(void *)) {
     if (pthread_create(thread, NULL, thread_func, NULL) != 0) {

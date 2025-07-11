@@ -12,16 +12,18 @@ pthread_mutex_t refresh_S2_lock;
 //       第S1+1行显示分隔行
 void refresh_S1(void) {
     int start_row = 0;
-    // 清除S1部分的内容
+
+    // 清除S1内容
     for (int i = 0; i < S1_ROW; i++) {
         printf("\033[%d;1H\033[K", start_row + i);
-        // printf("\033[41;33m");
     }
-    // 显示S1部分内容
-    uchar len = 0;
+
+    // 光标移动回去
+    printf("\033[%d;1H\033[K", 0);
+    // 显示S1内容
     // S1=4行, 每行显示4位好友, 格式: '[0..9A..F]. friendname'
-    int per_line = 4;
-    for (uchar i = 0; i < g_friends_len; i++) {
+    const int per_line = 4;
+    for (int i = 0; i < g_friends_len; i++) {
         printf("[%hX]. %s", i, g_friends[i].name);
         if ((i + 1) % per_line == 0 || i == g_friends_len - 1) {
             printf("\n");
@@ -31,7 +33,6 @@ void refresh_S1(void) {
     }
     start_row = S1_ROW + 1;
     printf("\033[%d;1H///////////分隔行s1//////////\n", start_row);
-    // printf(" \033[0m");
 }
 // b) 第2部分有S2=16行, 可显示8条最新的聊天记录, 每条聊天记录的格式为
 //         好友名 时:分:秒
@@ -44,6 +45,7 @@ void refresh_S2(void) {
     for (int i = 0; i < S2_ROW; i++) {
         printf("\033[%d;1H\033[K", start_row + i);
     }
+
     // 显示S2部分内容
     int records_to_show = g_chats_len;
     for (int i = 0; i < g_chats_len; i++) {

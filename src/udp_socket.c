@@ -59,7 +59,7 @@ int create_udp_recv_socket(int* client_socket, bool is_broadcast) {
         return -1;
     }
 
-    // todo 在一台设备上共享广播监听端口
+    // 在一台设备上共享广播监听端口
     if (is_broadcast) {
         int opt = 1;
         setsockopt(*client_socket, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));

@@ -218,7 +218,7 @@ int send_chat(void) {
 
     // 清空输入内容
     // todo 测试完记得放出来
-    // memset(buf_input, 0, sizeof(buf_input));
+    memset(buf_input, 0, sizeof(buf_input));
 
     // 重置CR状态
     is_press_cr = false; 
@@ -274,7 +274,6 @@ void main_thread(void) {
     ) {
         // 发送成功
         // 更新显示S2;
-        // todo 有两个线程尝试刷新S2, 应该加个锁
         refresh_S2();
     } else {
         // 发送失败
