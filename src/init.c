@@ -99,6 +99,6 @@ void init_all(void) {
     refresh_S3(friend_now, input_model, is_press_S);
 
     // 隐藏光标, 不然会乱闪
-    printf("\033[?25l");
+    save_printf("\033[?25l");
 }
 

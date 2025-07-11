@@ -235,7 +235,7 @@ void end_program(int signum) {
     g_bRunning = g_bRunning_EXIT;
     log_info("Ending program...");
     // 恢复光标
-    printf("\033[?25h");
+    save_printf("\033[?25h");
     // 设置终端为规范模式
     set_input_mode(0);
     // 释放配置文件占用内存

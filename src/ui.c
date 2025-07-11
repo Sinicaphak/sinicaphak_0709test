@@ -15,24 +15,24 @@ void refresh_S1(void) {
 
     // 清除S1内容
     for (int i = 0; i < S1_ROW; i++) {
-        printf("\033[%d;1H\033[K", start_row + i);
+        save_printf("\033[%d;1H\033[K", start_row + i);
     }
 
     // 光标移动回去
-    printf("\033[%d;1H\033[K", 0);
+    save_printf("\033[%d;1H\033[K", 0);
     // 显示S1内容
     // S1=4行, 每行显示4位好友, 格式: '[0..9A..F]. friendname'
     const int per_line = 4;
     for (int i = 0; i < g_friends_len; i++) {
-        printf("[%hX]. %s", i, g_friends[i].name);
+        save_printf("[%hX]. %s", i, g_friends[i].name);
         if ((i + 1) % per_line == 0 || i == g_friends_len - 1) {
-            printf("\n");
+            save_printf("\n");
         } else {
-            printf("  "); // 每个名字之间加两个空格
+            save_printf("  "); // 每个名字之间加两个空格
         }
     }
     start_row = S1_ROW + 1;
-    printf("\033[%d;1H///////////分隔行s1//////////\n", start_row);
+    save_printf("\033[%d;1H///////////分隔行s1//////////\n", start_row);
 }
 // b) 第2部分有S2=16行, 可显示8条最新的聊天记录, 每条聊天记录的格式为
 //         好友名 时:分:秒
@@ -43,7 +43,7 @@ void refresh_S2(void) {
     int start_row = S1_ROW + 2;
     // 清除S2部分的内容
     for (int i = 0; i < S2_ROW; i++) {
-        printf("\033[%d;1H\033[K", start_row + i);
+        save_printf("\033[%d;1H\033[K", start_row + i);
     }
 
     // 显示S2部分内容
@@ -56,14 +56,14 @@ void refresh_S2(void) {
         char time_str[9];
         strftime(time_str, sizeof(time_str), "%H:%M:%S", tm_info);
 
-        printf("\033[%d;1H%s %s \n%s\n", 
+        save_printf("\033[%d;1H%s %s \n%s\n", 
             start_row + i*2, g_chats[idx].name,
             time_str,
             g_chats[idx].content
         );
     }
     start_row = S1_ROW + 1 + S2_ROW + 1;
-    printf("\033[%d;1H///////////分隔行s2//////////\n", start_row);
+    save_printf("\033[%d;1H///////////分隔行s2//////////\n", start_row);
 
     pthread_mutex_unlock(&refresh_S2_lock);
 }
@@ -75,14 +75,14 @@ void refresh_S3(uchar friend_now, char model, bool is_press_S) {
     // 清除S3部分的内容
     int start_row = S1_ROW + 1 + S2_ROW + 2;
     for (int i = 0; i < S3_ROW; i++) {
-        printf("\033[%d;1H\033[K", start_row + i);
+        save_printf("\033[%d;1H\033[K", start_row + i);
     }
 
     uchar friend_state = friend_now == NULL_FRIEND ? 'N': friend_now;
     // 显示S3部分内容
-    printf("\033[%d;1H %s", start_row, buf_input);
+    save_printf("\033[%d;1H %s", start_row, buf_input);
     start_row++;
-    printf("\033[%d;1H [%c] 模式:[%c] 按S:[%d]", start_row, friend_state, model, (int)is_press_S);
+    save_printf("\033[%d;1H [%c] 模式:[%c] 按S:[%d]", start_row, friend_state, model, (int)is_press_S);
 }
 
 int push_g_friends(friend_info* new_friend) {
