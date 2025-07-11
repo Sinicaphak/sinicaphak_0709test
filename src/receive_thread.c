@@ -75,66 +75,83 @@ int process_chat_data(char* data, chat_record* recv_data) {
     return 0;
 }
 
-void* receive_thread(void* arg) {
+// 处理br_sock
+void recv_broadcast_data(void) {
+    // 接收广播数据;
+    char buffer[BUF_SIZE] = {0};
     friend_info friend_info_local;
+
+    // 非阻塞等待广播数据
+    int recv_len = recv(
+        bt_rx_s, buffer, sizeof(buffer), MSG_DONTWAIT
+    );
+
+    if (recv_len == -1)
+    {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // 没收到消息
+        } else {
+            perror("read");
+            log_error("Failed to receive broadcast data: %s", strerror(errno));
+        }
+        return;
+    } else if (recv_len > 0) {
+        // 解析数据
+        process_broadcast_data(buffer, &friend_info_local);
+        // 更新g_friends[N];
+        if (push_g_friends(&friend_info_local) != 0) {
+            log_warn("g_friends full");
+        } else {
+            // 更新显示S1;
+            refresh_S1();
+        }
+        return;
+    } else {
+        log_warn("recv_len <= 0, recv_len: %d", recv_len);
+        return;
+    }
+}
+
+// 处理da_sock
+void recv_chat_data(void) {
+    char buffer[BUF_SIZE] = {0};
     chat_record chat_record_local;
 
+    int recv_len = recv(
+        da_rx_s, buffer, sizeof(buffer), MSG_DONTWAIT
+    );
+
+    if (recv_len == -1)
+    {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            // 没收到消息
+        } else {
+            perror("read");
+            log_error("Failed to receive broadcast data: %s", strerror(errno));
+        }
+        return;
+    } else if (recv_len > 0) {
+        // 收到消息
+        process_chat_data(buffer, &chat_record_local);
+        //  更新g_chats[M];
+        if (push_g_chats(&chat_record_local) != 0) {
+            log_warn("g_chats push error");
+        } else {
+            //  更新显示S2;
+            refresh_S2();
+        }
+        return;
+    } else {
+        log_warn("recv_len <= 0, recv_len: %d", recv_len);
+        return;
+    }
+}
+
+void* receive_thread(void* arg) {
+    
     while(g_bRunning) {
-        // 处理br_sock
-        // 接收广播数据;
-        char buffer[BUF_SIZE] = {0};
-
-        int recv_len = recv(
-            bt_rx_s, buffer, sizeof(buffer), MSG_DONTWAIT
-        );
-
-        if (recv_len == -1)
-        {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                // 没收到消息
-            } else {
-                // todo 错误处理
-                perror("read");
-            }
-        } else if (recv_len > 0) {
-            process_broadcast_data(buffer, &friend_info_local);
-            // 更新g_friends[N];
-            if (push_g_friends(&friend_info_local) != 0) {
-                log_warn("g_friends full");
-            }
-        } else {
-            log_warn("recv_len <= 0, recv_len: %d", recv_len);
-        }
-        // 更新显示S1;
-        refresh_S1();
-
-        // 处理da_sock
-        memset(buffer, 0, sizeof(buffer));
-        recv_len = recv(
-            da_rx_s, buffer, sizeof(buffer), MSG_DONTWAIT
-        );
-
-        if (recv_len == -1)
-        {
-            if (errno == EAGAIN && errno == EWOULDBLOCK) {
-                // 没收到消息
-            } else {
-                // todo 错误处理
-                perror("read");
-            }
-        } else if (recv_len > 0) {
-            // 收到消息
-            process_chat_data(buffer, &chat_record_local);
-            //  更新g_chats[M];
-            if (push_g_chats(&chat_record_local) != 0) {
-                log_warn("g_chats push error");
-            }
-        } else {
-            log_warn("recv_len <= 0, recv_len: %d", recv_len);
-        }
-           
-        //  更新显示S2;
-        refresh_S2();
+        recv_broadcast_data();
+        recv_chat_data();
     }
 
     pthread_exit(NULL);

@@ -11,6 +11,12 @@
 // 标记程序正常运行中
 #define g_bRunning_RUNNING 1
 
+// 标记未选中好友
+#define NULL_FRIEND 255
+
+// 聊天输入内容的最大长度为80, buf_input
+#define CHAT_INPUT_LEN 80
+
 // 创建广播发送br_tx_s;
 // 创建广播接收bt_rx_s,
 // 创建数据发送da_tx_s;
@@ -38,6 +44,8 @@ extern bool is_press_cr;
 // 标记程序运行状态
 extern bool g_bRunning;
 
+// 输入的聊天内容, 多一位保证字符串以'\0'结尾
+extern char buf_input[CHAT_INPUT_LEN + 1]; 
 
 void end_program(int signum);
 void main_thread(void);

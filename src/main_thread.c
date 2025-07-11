@@ -27,6 +27,25 @@ int da_rx_s = 0;
 // 标记程序运行状态
 bool g_bRunning = g_bRunning_EXIT;
 
+// 输入的聊天内容, 多一位保证字符串以'\0'结尾
+char buf_input[CHAT_INPUT_LEN + 1] = {0}; 
+
+//非阻塞检测键盘输入
+static int get_char() {
+    fd_set rfds;
+    struct timeval tv;
+    int ch=0;
+    FD_ZERO(&rfds);
+    FD_SET(0,&rfds);
+    tv.tv_sec =0;
+    tv.tv_usec=1;//设置等待超时时间
+    //检测键盘是否有输入
+    if(select(1,&rfds,NULL,NULL,&tv)>0) {
+        ch = getchar();
+    }
+    return ch;
+}
+
 // 处理用户键盘输入
 void process_keyboard_input(void) {
     char ch = get_char();
@@ -241,7 +260,7 @@ void main_thread(void) {
     refresh_S3(friend_now, input_model, is_press_S);
     // 检查是否需要发送聊天数据包
     if (
-        check_chat_need_send() == -1
+        check_chat_need_send() != 0
     ) {
         // 不需要发送聊天数据包, 直接返回
         return;

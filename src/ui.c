@@ -6,6 +6,7 @@ uchar g_friends_len;
 uchar g_chats_len;
 pthread_mutex_t g_friends_lock;
 pthread_mutex_t g_chats_lock;
+pthread_mutex_t refresh_S2_lock;
 
 // a) 第1部分有S1=4行, 用于显示好友列表, 每行显示4位, 显示格式为'[0..9A..F]. friendname'
 //       第S1+1行显示分隔行
@@ -36,6 +37,7 @@ void refresh_S1(void) {
 //         好友名 时:分:秒
 //         聊天内容(<=80字符)
 void refresh_S2(void) {
+    pthread_mutex_lock(&refresh_S2_lock);
     int start_row = S1_ROW + 2;
     // 清除S2部分的内容
     for (int i = 0; i < S2_ROW; i++) {
@@ -59,14 +61,12 @@ void refresh_S2(void) {
     }
     start_row = S1_ROW + 1 + S2_ROW + 1;
     printf("\033[%d;1H///////////分隔行s2//////////\n", start_row);
+    pthread_mutex_unlock(&refresh_S2_lock);
 }
 
 // c) 第3部分有S3=2行, 分别显示
 // 输入的聊天内容(<=80字符)
 // 好友代号列表[0..9A..F]
-
-// 输入的聊天内容, 初始化为0
-char buf_input[80 + 1] = {0}; 
 void refresh_S3(uchar friend_now, char model, bool is_press_S) {
     // 清除S3部分的内容
     int start_row = S1_ROW + 1 + S2_ROW + 2;
@@ -82,12 +82,12 @@ void refresh_S3(uchar friend_now, char model, bool is_press_S) {
 }
 
 int push_g_friends(friend_info* new_friend) {
+    pthread_mutex_lock(&g_friends_lock);
     if (g_friends_len >= N) {
         // 超过最大好友数量
         log_error("好友列表已满，无法添加新好友");
         return -1; 
     }
-    // pthread_mutex_lock(&g_friends_lock);
 
     for (int i = 0; i < g_friends_len; i++) {
         if (strcmp(g_friends[i].name, new_friend->name) == 0) {
@@ -97,7 +97,7 @@ int push_g_friends(friend_info* new_friend) {
     }
     memcpy(&g_friends[g_friends_len], new_friend, sizeof(friend_info));
     g_friends_len++;
-    // pthread_mutex_unlock(&g_friends_lock);
+    pthread_mutex_unlock(&g_friends_lock);
     return 0;
 }
 
@@ -118,7 +118,7 @@ int push_g_chats(chat_record* new_record) {
 
 int push_buf_input(char input) {
     size_t len = strlen(buf_input);
-    if (len < 80) {
+    if (len < CHAT_INPUT_LEN) {
         buf_input[len] = input;
         buf_input[len + 1] = '\0'; // 确保字符串以'\0'结尾
     } else {

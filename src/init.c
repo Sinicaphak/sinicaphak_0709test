@@ -26,11 +26,22 @@ void set_input_mode(int enable) {
     }
 }
 
-// 程序初始化
-void init_all(void) {
+void init_lock(void) {
     // 设置日志锁
     log_set_lock(log_lock, NULL);
+    // 初始化g_chats和g_friends的锁
+    pthread_mutex_init(&g_friends_lock, NULL);
+    pthread_mutex_init(&g_chats_lock, NULL);
+    // 初始化S2区域刷新锁
+    pthread_mutex_init(&refresh_S2_lock, NULL);
+}
+
+// 程序初始化
+void init_all(void) {
     log_info("Starting server...");
+    // 初始化锁
+    init_lock();
+    // 日志等级
     log_set_level(LOG_LEVEL_LOCAL);
     
     // 加载本地配置
@@ -47,10 +58,6 @@ void init_all(void) {
         log_fatal("Failed to create UDP sockets");
         g_bRunning = g_bRunning_EXIT;
     }
-
-    // 初始化g_chats和g_friends的锁
-    pthread_mutex_init(&g_friends_lock, NULL);
-    pthread_mutex_init(&g_chats_lock, NULL);
 
     // 标记程序正常运行
     g_bRunning = g_bRunning_RUNNING;
