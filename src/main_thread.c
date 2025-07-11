@@ -220,10 +220,13 @@ int send_chat(void) {
     // todo 测试完记得放出来
     // memset(buf_input, 0, sizeof(buf_input));
 
+    // 重置CR状态
+    is_press_cr = false; 
     return 0;
 
 // 发送失败
 send_chat_failed:
+    is_press_cr = false; 
     return -1;
 }
 

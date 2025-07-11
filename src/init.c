@@ -43,6 +43,11 @@ void init_all(void) {
     init_lock();
     // 日志等级
     log_set_level(LOG_LEVEL_LOCAL);
+
+    // 注册 crtl c 时收尾函数
+    signal(SIGINT, end_program);
+    // 无需回车直接捕捉输入字符
+    set_input_mode(1);
     
     // 加载本地配置
     g_config = malloc(sizeof(Config*));
@@ -61,11 +66,6 @@ void init_all(void) {
 
     // 标记程序正常运行
     g_bRunning = g_bRunning_RUNNING;
-
-    // 注册 crtl c 时收尾函数
-    signal(SIGINT, end_program);
-    // 无需回车直接捕捉输入字符
-    set_input_mode(1);
 
     // 创建线程
     CreateThread(&broadcast_thread_pid, broadcast_thread);

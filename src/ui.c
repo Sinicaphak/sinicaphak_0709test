@@ -38,6 +38,7 @@ void refresh_S1(void) {
 //         聊天内容(<=80字符)
 void refresh_S2(void) {
     pthread_mutex_lock(&refresh_S2_lock);
+    
     int start_row = S1_ROW + 2;
     // 清除S2部分的内容
     for (int i = 0; i < S2_ROW; i++) {
@@ -61,6 +62,7 @@ void refresh_S2(void) {
     }
     start_row = S1_ROW + 1 + S2_ROW + 1;
     printf("\033[%d;1H///////////分隔行s2//////////\n", start_row);
+
     pthread_mutex_unlock(&refresh_S2_lock);
 }
 
@@ -86,19 +88,27 @@ int push_g_friends(friend_info* new_friend) {
     if (g_friends_len >= N) {
         // 超过最大好友数量
         log_error("好友列表已满，无法添加新好友");
-        return -1; 
+        goto push_g_friends_failed;
     }
 
     for (int i = 0; i < g_friends_len; i++) {
         if (strcmp(g_friends[i].name, new_friend->name) == 0) {
             // 好友已存在
-            return 0;
+            goto push_g_friends_success;
         }
     }
+
     memcpy(&g_friends[g_friends_len], new_friend, sizeof(friend_info));
     g_friends_len++;
+    goto push_g_friends_success;
+
+push_g_friends_success:
     pthread_mutex_unlock(&g_friends_lock);
     return 0;
+
+push_g_friends_failed:
+    pthread_mutex_unlock(&g_friends_lock);
+    return -1;
 }
 
 // g_chats视为循环队列
@@ -112,8 +122,14 @@ int push_g_chats(chat_record* new_record) {
         memmove(&g_chats[0], &g_chats[1], sizeof(chat_record) * (M - 1));
         memcpy(&g_chats[M - 1], new_record, sizeof(chat_record));
     }
+    goto push_g_chats_success;
+
+push_g_chats_success:
     pthread_mutex_unlock(&g_chats_lock);
     return 0;
+push_g_chats_failed:
+    pthread_mutex_unlock(&g_chats_lock);
+    return -1;
 }
 
 int push_buf_input(char input) {

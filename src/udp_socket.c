@@ -19,9 +19,6 @@ int create_udp_send_socket(int* server_socket, bool is_broadcast) {
         return -1;
     }
 
-    // char* ifname = "ens39";
-    // setsockopt(*server_socket, SOL_SOCKET, SO_BINDTODEVICE, ifname, strlen(ifname));
-
     if (is_broadcast) {
         // 允许广播
         int broadcastEnable = 1;
