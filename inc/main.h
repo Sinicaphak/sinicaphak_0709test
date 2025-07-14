@@ -1,7 +1,13 @@
 #ifndef MIAN_H
 #define MIAN_H
 
-#define _GNU_SOURCE
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifndef _GNU_SOURCE
+    #define _GNU_SOURCE
+#endif
 // lib
 #include <errno.h>
 #include <sys/types.h>
@@ -48,5 +54,9 @@
 #include "receive_thread.h"
 #include "read_config.h"
 #include "ui.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
