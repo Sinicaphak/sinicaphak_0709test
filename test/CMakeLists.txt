@@ -19,8 +19,6 @@ foreach(target IN LISTS targets)
     # 为测试指定头文件
     target_include_directories(${target} PRIVATE
         ${CMAKE_SOURCE_DIR}/inc
-        ${CMAKE_SOURCE_DIR}/inc/test
-        ${CMAKE_SOURCE_DIR}/inc/test/doctest
     )
     # 链接项目库
     target_link_libraries(${target} PRIVATE static_lib GTest::gtest_main)

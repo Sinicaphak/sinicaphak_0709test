@@ -1,4 +1,5 @@
 build
-output/
+# output/
 temp_tool/
 .vscode
+main

@@ -1,0 +1,11 @@
+@startuml test
+
+hide empty description
+
+[*] --> 数据模式 : 程序开始
+数据模式 --> 命令模式: 按Esc
+数据模式 --> 数据模式: 输入字符'i'
+命令模式 --> 数据模式: 输入字符'i'
+命令模式 --> 命令模式: 按Esc
+
+@enduml
