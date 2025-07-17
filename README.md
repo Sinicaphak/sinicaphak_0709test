@@ -2,7 +2,7 @@
 
 ## 要求：
 
-在命令行方式下实现限定人数的相互聊天
+在命令行方式下实现16人以下的相互聊天
 
 ## 项目结构树
 .
@@ -18,11 +18,9 @@
 │   └── tool                   工具类
 └── test                       单元测试, 使用google test
 
-
 ## 使用
 
 ### 构建
-
 ```
 mkdir build
 cd ./build
@@ -30,7 +28,9 @@ cmake ..
 make
 ```
 
-### 使用
+默认不构建测试, 使用`cmake .. -DBUILD_TESTING=y && make`构建本项目测试, 需要翻墙下载google test框架
+
+### 程序使用
 
 1. 参照`./项目文档/设计报告/软件设计文档v1.doc`中6.3节 或 `inc/read_config.h`描述, 按需修改配置文件: `./output/config.json`
 2. 运行`./output/main`
@@ -55,6 +55,5 @@ make
         - 程序向好友ip发送聊天内容包
         - 聊天socket端口为10001, 在`./inc/main_thread.h/CHAT_PORT`处定义
         - ID包结构: `昵称名\t己方IP\t好友名\t对方IP\t聊天内容`
-5. 命令模式下输入`q`结束程序
+5. 命令模式下输入`q`结束程序, 或者按两下`crtl c`
 
-### 测试&测试构建
